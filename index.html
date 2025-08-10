@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Návštěvní kniha</title>
+    <meta name="theme-color" content="#1f2937">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+        }
+        
+        #video-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #000;
+        }
+        
+        #qr-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #scan-region {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #fafafa;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        
+        .visitor-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .visitor-item:hover {
+            background: #f1f5f9;
+            transform: translateX(5px);
+        }
+        
+        .visitor-name {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .visitor-details {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fca5a5;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .manual-input {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .manual-input h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Návštěvní kniha</h1>
+            <p>Skenování QR kódu nebo ruční zadání</p>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="mainMenu" class="card">
+            <button class="btn btn-primary" onclick="startQRScan()">
+                📷 Skenovat QR kód
+            </button>
+            <button class="btn btn-secondary" onclick="showManualEntry()">
+                ✍️ Ruční zadání návštěvy
+            </button>
+            <button class="btn btn-secondary" onclick="showVisitors()">
+                📋 Zobrazit návštěvy
+            </button>
+            <button class="btn btn-secondary" onclick="showStats()">
+                📊 Statistiky
+            </button>
+        </div>
+
+        <!-- QR Scanner -->
+        <div id="scannerView" class="card hidden">
+            <div id="video-container">
+                <video id="qr-video" autoplay playsinline muted></video>
+                <div id="scan-region"></div>
+            </div>
+            <div style="text-align: center; margin-bottom: 15px; color: #6b7280;">
+                Nasměrujte kameru na QR kód
+            </div>
+            <button class="btn btn-secondary" onclick="stopQRScan()">
+                ❌ Ukončit skenování
+            </button>
+        </div>
+
+        <!-- Manual Entry -->
+        <div id="manualEntry" class="card hidden">
+            <h3 style="margin-bottom: 20px; color: #1f2937;">Ruční zadání návštěvy</h3>
+            
+            <div class="manual-input">
+                <h4>QR kód data (volitelné):</h4>
+                <input type="text" id="manualQRData" placeholder="Zadejte obsah QR kódu nebo nechte prázdné">
+            </div>
+
+            <form id="manualForm">
+                <div class="form-group">
+                    <label>Jméno návštěvníka: *</label>
+                    <input type="text" id="manualVisitorName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Účel návštěvy: *</label>
+                    <input type="text" id="manualVisitPurpose" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Poznámka:</label>
+                    <textarea id="manualVisitNote" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    ✅ Registrovat návštěvu
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="showMainMenu()">
+                    ← Zpět na hlavní menu
+                </button>
+            </form>
+        </div>
+
+        <!-- Visitor Form (from QR scan) -->
+        <div id="visitorForm" class="card hidden">
+            <h3 style="margin-bottom: 20px; color: #1f2937;">Registrace návštěvy</h3>
+            
+            <div id="qrInfo" style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>Naskenované údaje:</strong>
+                <div id="qrData"></div>
+            </div>
+
+            <form id="visitForm">
+                <div class="form-group">
+                    <label>Jméno návštěvníka: *</label>
+                    <input type="text" id="visitorName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Účel návštěvy: *</label>
+                    <input type="text" id="visitPurpose" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Poznámka:</label>
+                    <textarea id="visitNote" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    ✅ Registrovat návštěvu
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="showMainMenu()">
+                    ← Zpět na hlavní menu
+                </button>
+            </form>
+        </div>
+
+        <!-- Visitors List -->
+        <div id="visitorsView" class="card hidden">
+            <h3 style="margin-bottom: 20px; color: #1f2937;">Historie návštěv</h3>
+            <div id="visitorsList"></div>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                ← Zpět na hlavní menu
+            </button>
+            <button class="btn btn-success" onclick="exportData()">
+                📥 Export dat (CSV)
+            </button>
+            <button class="btn btn-secondary" onclick="clearAllData()" style="background: #dc2626; color: white;">
+                🗑️ Vymazat vše
+            </button>
+        </div>
+
+        <!-- Stats View -->
+        <div id="statsView" class="card hidden">
+            <h3 style="margin-bottom: 20px; color: #1f2937;">Statistiky</h3>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalVisits">0</div>
+                    <div class="stat-label">Celkem návštěv</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todayVisits">0</div>
+                    <div class="stat-label">Dnes</div>
+                </div>
+            </div>
+            <div id="recentVisits"></div>
+            <button class="btn btn-secondary" onclick="showMainMenu()">
+                ← Zpět na hlavní menu
+            </button>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        let currentStream = null;
+        let isScanning = false;
+        let currentQRData = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showMainMenu();
+            updateStats();
+        });
+
+        // Navigation functions
+        function showMainMenu() {
+            hideAllViews();
+            document.getElementById('mainMenu').classList.remove('hidden');
+        }
+
+        function hideAllViews() {
+            const views = ['mainMenu', 'scannerView', 'manualEntry', 'visitorForm', 'visitorsView', 'statsView'];
+            views.forEach(view => {
+                document.getElementById(view).classList.add('hidden');
+            });
+        }
+
+        function showMessage(text, type = 'success') {
+            const messageEl = document.getElementById('message');
+            messageEl.innerHTML = `<div class="${type}-message">${text}</div>`;
+            setTimeout(() => {
+                messageEl.innerHTML = '';
+            }, 4000);
+        }
+
+        // Manual entry
+        function showManualEntry() {
+            hideAllViews();
+            document.getElementById('manualEntry').classList.remove('hidden');
+        }
+
+        document.getElementById('manualForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const visit = {
+                id: Date.now(),
+                qrData: document.getElementById('manualQRData').value || 'Ruční zadání',
+                name: document.getElementById('manualVisitorName').value,
+                purpose: document.getElementById('manualVisitPurpose').value,
+                note: document.getElementById('manualVisitNote').value,
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleDateString('cs-CZ'),
+                time: new Date().toLocaleTimeString('cs-CZ')
+            };
+
+            saveVisit(visit);
+            showMessage('Návštěva byla úspěšně registrována!');
+            
+            // Reset form
+            document.getElementById('manualForm').reset();
+            showMainMenu();
+            updateStats();
+        });
+
+        // QR Scanner with basic implementation
+        async function startQRScan() {
+            hideAllViews();
+            document.getElementById('scannerView').classList.remove('hidden');
+
+            const video = document.getElementById('qr-video');
+            
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                });
+                
+                video.srcObject = currentStream;
+                isScanning = true;
+                
+                // Start scanning process
+                scanForQR();
+                
+            } catch (error) {
+                console.error('Camera error:', error);
+                showMessage('Nepodařilo se spustit kameru. Zkuste ruční zadání.', 'error');
+                showMainMenu();
+            }
+        }
+
+        function stopQRScan() {
+            isScanning = false;
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            showMainMenu();
+        }
+
+        // Basic QR detection (simplified - detects any square-like pattern)
+        async function scanForQR() {
+            if (!isScanning) return;
+
+            // This is a simplified approach - in real implementation you would use a proper QR library
+            // For now, we'll simulate QR detection after some time or user can manually input data
+            
+            setTimeout(() => {
+                if (isScanning) {
+                    // Show option to manually enter QR data
+                    if (confirm('QR kód nebyl automaticky rozpoznán. Chcete zadat data ručně?')) {
+                        const qrData = prompt('Zadejte obsah QR kódu:');
+                        if (qrData) {
+                            handleQRResult(qrData);
+                        }
+                    }
+                    stopQRScan();
+                }
+            }, 5000); // After 5 seconds, prompt for manual entry
+        }
+
+        function handleQRResult(data) {
+            currentQRData = data;
+            
+            // Get current visit count for this QR
+            const currentCount = getQRVisitCount(data);
+            const nextVisit = currentCount + 1;
+            
+            // Try to parse JSON data
+            let parsedData = null;
+            try {
+                parsedData = JSON.parse(data);
+            } catch (e) {
+                parsedData = { info: data };
+            }
+
+            // Show visitor form
+            hideAllViews();
+            document.getElementById('visitorForm').classList.remove('hidden');
+            
+            // Display QR data with visit counter
+            let qrDisplayHtml = formatQRData(parsedData);
+            
+            // Add visit counter info
+            qrDisplayHtml += `
+                <div style="margin-top: 15px; padding: 10px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                    <strong>📊 Počet návštěv pro tento QR kód: ${currentCount}</strong><br>
+                    <span style="color: #0369a1;">Toto bude ${nextVisit}. návštěva</span>
+                    ${nextVisit === 6 ? '<br><span style="color: #dc2626; font-weight: bold;">🎉 Příští návštěva bude ZDARMA!</span>' : ''}
+                    ${nextVisit > 6 && (nextVisit - 1) % 6 === 0 ? '<br><span style="color: #dc2626; font-weight: bold;">🎉 Tato návštěva je ZDARMA!</span>' : ''}
+                </div>
+            `;
+            
+            document.getElementById('qrData').innerHTML = qrDisplayHtml;
+            
+            // Pre-fill form if data available
+            if (parsedData.name) {
+                document.getElementById('visitorName').value = parsedData.name;
+            }
+            if (parsedData.purpose) {
+                document.getElementById('visitPurpose').value = parsedData.purpose;
+            }
+        }
+
+        function formatQRData(data) {
+            if (typeof data === 'string') {
+                return `<div>${data}</div>`;
+            }
+            
+            let html = '';
+            for (const [key, value] of Object.entries(data)) {
+                html += `<div><strong>${key}:</strong> ${value}</div>`;
+            }
+            return html || '<div>Naskenovaná data</div>';
+        }
+
+        // Visitor form submission
+        document.getElementById('visitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const visit = {
+                id: Date.now(),
+                qrData: currentQRData,
+                name: document.getElementById('visitorName').value,
+                purpose: document.getElementById('visitPurpose').value,
+                note: document.getElementById('visitNote').value,
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleDateString('cs-CZ'),
+                time: new Date().toLocaleTimeString('cs-CZ')
+            };
+
+            saveVisit(visit);
+            showMessage('Návštěva byla úspěšně registrována!');
+            
+            document.getElementById('visitForm').reset();
+            currentQRData = null;
+            showMainMenu();
+            updateStats();
+        });
+
+        // Data management
+        function saveVisit(visit) {
+            let visits = JSON.parse(localStorage.getItem('visits') || '[]');
+            visits.unshift(visit);
+            localStorage.setItem('visits', JSON.stringify(visits));
+            
+            // Update visit counter for QR code
+            updateQRVisitCounter(visit.qrData);
+        }
+
+        function updateQRVisitCounter(qrData) {
+            let qrCounters = JSON.parse(localStorage.getItem('qrCounters') || '{}');
+            const qrKey = typeof qrData === 'string' ? qrData : JSON.stringify(qrData);
+            
+            if (!qrCounters[qrKey]) {
+                qrCounters[qrKey] = 0;
+            }
+            qrCounters[qrKey]++;
+            
+            localStorage.setItem('qrCounters', JSON.stringify(qrCounters));
+            
+            // Check for bonus (6th visit)
+            if (qrCounters[qrKey] === 6) {
+                showBonusMessage();
+            }
+            
+            return qrCounters[qrKey];
+        }
+
+        function getQRVisitCount(qrData) {
+            let qrCounters = JSON.parse(localStorage.getItem('qrCounters') || '{}');
+            const qrKey = typeof qrData === 'string' ? qrData : JSON.stringify(qrData);
+            return qrCounters[qrKey] || 0;
+        }
+
+        function showBonusMessage() {
+            const bonusHtml = `
+                <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 20px; border-radius: 15px; text-align: center; margin: 20px 0; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3); animation: pulse 2s infinite;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                    <h3 style="margin-bottom: 10px;">GRATULUJEME!</h3>
+                    <p style="font-size: 1.2rem; margin-bottom: 5px;">6. návštěva = ZDARMA!</p>
+                    <p style="font-size: 0.9rem; opacity: 0.9;">Tato návštěva je na náš účet</p>
+                </div>
+                <style>
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.05); }
+                        100% { transform: scale(1); }
+                    }
+                </style>
+            `;
+            
+            document.getElementById('message').innerHTML = bonusHtml;
+            
+            // Auto hide after 8 seconds
+            setTimeout(() => {
+                document.getElementById('message').innerHTML = '';
+            }, 8000);
+        }
+
+        function getVisits() {
+            return JSON.parse(localStorage.getItem('visits') || '[]');
+        }
+
+        function showVisitors() {
+            hideAllViews();
+            document.getElementById('visitorsView').classList.remove('hidden');
+            
+            const visits = getVisits();
+            const listEl = document.getElementById('visitorsList');
+            
+            if (visits.length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">Zatím žádné návštěvy</p>';
+                return;
+            }
+
+            listEl.innerHTML = visits.map(visit => `
+                <div class="visitor-item">
+                    <div class="visitor-name">${visit.name}</div>
+                    <div class="visitor-details">
+                        📍 ${visit.purpose}<br>
+                        📅 ${visit.date} v ${visit.time}<br>
+                        ${visit.note ? `📝 ${visit.note}<br>` : ''}
+                        🔍 QR: ${typeof visit.qrData === 'string' ? visit.qrData.substring(0, 50) : JSON.stringify(visit.qrData).substring(0, 50)}${visit.qrData.length > 50 ? '...' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showStats() {
+            hideAllViews();
+            document.getElementById('statsView').classList.remove('hidden');
+            updateStats();
+        }
+
+        function updateStats() {
+            const visits = getVisits();
+            const today = new Date().toLocaleDateString('cs-CZ');
+            const todayVisits = visits.filter(v => v.date === today);
+
+            document.getElementById('totalVisits').textContent = visits.length;
+            document.getElementById('todayVisits').textContent = todayVisits.length;
+
+            const recentEl = document.getElementById('recentVisits');
+            const recent = visits.slice(0, 5);
+            
+            if (recent.length > 0) {
+                recentEl.innerHTML = `
+                    <h4 style="margin-bottom: 15px; color: #374151;">Poslední návštěvy:</h4>
+                    ${recent.map(visit => `
+                        <div style="background: #f1f5f9; padding: 12px; margin-bottom: 10px; border-radius: 8px; font-size: 0.9rem;">
+                            <strong>${visit.name}</strong> - ${visit.purpose}<br>
+                            <span style="color: #6b7280;">${visit.date} v ${visit.time}</span>
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                recentEl.innerHTML = '<p style="color: #6b7280; text-align: center;">Zatím žádné návštěvy</p>';
+            }
+        }
+
+        function exportData() {
+            const visits = getVisits();
+            if (visits.length === 0) {
+                showMessage('Žádná data k exportu', 'error');
+                return;
+            }
+
+            const headers = ['Jméno', 'Účel', 'Datum', 'Čas', 'Poznámka', 'QR Data'];
+            const csvContent = [
+                headers.join(','),
+                ...visits.map(visit => [
+                    `"${visit.name}"`,
+                    `"${visit.purpose}"`,
+                    `"${visit.date}"`,
+                    `"${visit.time}"`,
+                    `"${visit.note || ''}"`,
+                    `"${typeof visit.qrData === 'string' ? visit.qrData : JSON.stringify(visit.qrData)}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `navstevy_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('Data byla exportována do CSV souboru!');
+        }
+
+        function clearAllData() {
+            if (confirm('Opravdu chcete vymazat všechny návštěvy? Tuto akci nelze vrátit zpět.')) {
+                localStorage.removeItem('visits');
+                showMessage('Všechna data byla vymazána.', 'success');
+                updateStats();
+                showVisitors();
+            }
+        }
+    </script>
+</body>
+</html>
